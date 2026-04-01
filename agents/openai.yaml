@@ -1,0 +1,4 @@
+interface:
+  display_name: "Push What You Did"
+  short_description: "Commit and push only files edited by this agent"
+  default_prompt: "Use $push-what-you-did to commit and push only the files you modified in this task."
