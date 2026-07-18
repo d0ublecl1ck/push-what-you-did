@@ -5,22 +5,26 @@ A reusable agent skill that commits and pushes only the files the agent edited f
 ## What it does
 
 - Detects whether the workspace is a single repository or a multi-repo workspace
-- Runs pre-checks before staging: `git status`, `git diff`, `git log --oneline -5`
+- Runs the same preflight checks as `commit-and-push`: status, diffs, log, remotes, upstream
 - Builds a scoped owned-file list from files the agent directly modified
 - Stages only owned paths instead of staging the entire worktree
-- Writes commit messages from the staged diff via HEREDOC
+- Groups owned paths into focused Conventional Commits (`type(scope): subject`)
+- Guards secrets and local junk with the same rules as `commit-and-push`
 - Re-stages hook changes only when they stay inside the owned path list
-- Pushes automatically after a successful scoped commit
+- Synchronizes with `git pull --ff-only` and asks before any rebase when diverged
+- Pushes automatically after successful scoped commits
 
 ## How it differs from Commit&Push
 
-- `Commit&Push` commits all current changes in the repository, including unrelated files
-- `Push What You Did` commits only the files the agent changed during the current task
-- `Push What You Did` stops if hooks or follow-up changes try to pull unrelated files into the commit
+The only difference is commit scope; everything else — safety guards, commit format, sync strategy — is identical.
+
+- `commit-and-push` commits all worktree changes, including changes outside the current conversation
+- `push-what-you-did` commits only the files the agent changed during the current task
+- `push-what-you-did` stops if hooks or follow-up changes try to pull unrelated files into the commit
 
 ## When to use
 
-Use this skill when you want your agent to commit and push only its own changes in a dirty worktree without touching unrelated edits.
+Use this skill when you want your agent to commit and push only its own changes in a dirty worktree without touching unrelated edits. Use `commit-and-push` when every worktree change should be committed.
 
 ## How to trigger
 
@@ -48,3 +52,4 @@ cp -R push-what-you-did <your-agent-skills-dir>/
 - Never commits unrelated untracked files just because they exist
 - Never modifies git config
 - Never uses interactive git commands
+- Never force pushes implicitly; asks before any rebase when the branch has diverged
